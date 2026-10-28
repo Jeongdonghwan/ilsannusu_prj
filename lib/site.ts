@@ -6,6 +6,10 @@ export const SITE_URL = process.env.SITE_URL || 'https://leak.example';
 export const BRAND = '스타누수탐지'; // 사용자 확정 2026-10-27 (플레이스 상호는 '누수탐지', 홈페이지 로고는 '스타누수탐지공사')
 export const SITE_NAME = `${BRAND} | 일산 누수탐지·누수공사`;
 
+// 카카오톡 채널 주소 — 기존 홈페이지에 채널 주소가 없음(pf.kakao.com 만). 받으면 넣기, 비어 있으면 버튼 자리에 플레이스
+export const KAKAO = '';
+export const BLOG = 'https://blog.naver.com/ilmano14'; // 기존 홈페이지 '블로그' 메뉴
+
 export const CONTACT = {
   phone: '010-8119-8204', // 홈페이지 대표번호 (플레이스에는 안심번호 0507-1446-8215 노출)
   sms: '010-8119-8204',

@@ -23,7 +23,7 @@ export const PlaceLink = ({ className = 'btn-text', label = '네이버 플레이
 export const Actions = ({ sms = true, place = false }: { sms?: boolean; place?: boolean }) => (
   <div className="actions">
     <a className="btn-primary" href={tel}><IconPhone /><span>{CONTACT.phone}</span></a>
-    {sms && <a className="btn-text" href={smsHref}><IconMsg /><span>젖은 곳 사진 문자로 보내기</span><IconArrow /></a>}
+    {sms && <a className="btn-text" href={smsHref}><IconMsg /><span>누수사진 문자로 보내기</span><IconArrow /></a>}
     {place && <PlaceLink />}
   </div>
 );
@@ -46,8 +46,7 @@ export const Header = () => (
   <header className="site-header">
     <div className="wrap header-inner">
       <Link href="/" className="logo" aria-label={`${BRAND} 홈`}>
-        <span className="logo-mark" />
-        <span><b>{BRAND}</b><small>일산 누수탐지 · 누수공사</small></span>
+        <img src="/img/logo-star.png" alt={`${BRAND} 누수탐지·누수공사 로고`} width={794} height={214} className="logo-img" />
       </Link>
       <nav className="nav" aria-label="주 메뉴">
         <Link href="/cases/" className="hide-m">시공 사진</Link>
@@ -64,7 +63,7 @@ export const Footer = () => (
     <div className="wrap foot-grid">
       <div>
         <strong className="foot-brand">{BRAND}</strong>
-        <p>누수탐지 · 누수공사 · 하수구 막힘 · 고압세척. 일산을 중심으로 김포·파주·은평구·마포, 서울·경기·인천 전지역 출장 상담. {CONTACT.hours}.</p>
+        <p>누수탐지 · 누수공사 · 하수구막힘 · 고압세척<br />일산·김포·파주·은평·마포·강서지역 출장상담 {CONTACT.hours}</p>
         <p><Link href="/area/">지역 안내</Link> · <Link href="/cases/">시공 사진</Link> · <a href="/rss.xml">RSS</a></p>
       </div>
       <ul className="foot-info">

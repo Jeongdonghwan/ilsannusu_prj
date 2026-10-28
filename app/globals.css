@@ -349,3 +349,40 @@ button { font: inherit; }
   .hero-text { padding: 72px 0 72px; }
 }
 @media (max-width: 560px) { .hero-photo { margin: 0; height: auto; } .hero-photo figcaption { font-size: .72rem; } }
+
+/* 로고 이미지 (2026-10-28 교체) */
+.logo-img { height: 40px; width: auto; display: block; }
+@media (max-width: 560px) { .logo-img { height: 32px; } }
+
+/* 메인 히어로: 업체 배너 구성 (2026-10-28 사용자 수정 요청) */
+.hero-star { background: radial-gradient(120% 90% at 20% 30%, #12305a 0%, var(--deep) 70%); }
+.star-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 48px; align-items: center; padding-top: 64px; padding-bottom: 48px; }
+.star-eyebrow { margin: 0 0 18px; font-size: clamp(1.4rem, 2.8vw, 2rem); font-weight: 800; letter-spacing: -0.03em; animation: fade .9s var(--ease) both; }
+.star-eyebrow em { font-style: normal; color: #ffc21a; }
+.hero-star h1 { display: flex; align-items: center; gap: 16px; margin: 0 0 20px; font-size: clamp(2.4rem, 6vw, 4.4rem); line-height: 1; animation: fade 1s .1s var(--ease) both; }
+.hero-star h1 img { width: clamp(64px, 8vw, 104px); height: auto; background: #fff; border-radius: 50%; padding: 6px; flex: none; }
+.star-lead { margin: 0 0 30px; font-size: 1.08rem; line-height: 1.7; color: rgba(255,255,255,.88); animation: fade 1s .25s var(--ease) both; }
+.star-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 600px; animation: fade 1s .35s var(--ease) both; }
+.sb { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 17px 14px; font-weight: 800; font-size: 1.02rem; text-decoration: none; border-radius: 3px; transition: transform .2s var(--ease), filter .2s var(--ease); font-variant-numeric: tabular-nums; }
+.sb:hover { transform: translateY(-2px); filter: brightness(1.06); }
+.sb-tel { background: linear-gradient(180deg, #ffb21e, #f08c00); color: #1a1200; }
+.sb-kakao { background: #fee500; color: #191600; }
+.sb-sms { background: #0f9d58; color: #fff; }
+.sb-blog { background: #fff; color: #0f8a4c; border: 2px solid #0f9d58; }
+.star-photo { margin: 0; position: relative; aspect-ratio: 666 / 602; overflow: hidden; border-radius: 4px; box-shadow: 0 24px 60px rgba(0,0,0,.4); }
+.star-photo img { width: 100%; height: 100%; object-fit: cover; display: block; animation: settle 1.6s var(--ease) both; }
+.star-points { list-style: none; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 0; margin: 0 auto; padding-top: 20px; padding-bottom: 22px; border-top: 1px solid rgba(255,194,26,.4); }
+.star-points li { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: .98rem; padding: 0 18px; border-left: 1px solid var(--line-dark); }
+.star-points li:first-child { border-left: 0; padding-left: 0; }
+.star-points li::before { content: ''; width: 14px; height: 14px; border: 2px solid #ffc21a; border-radius: 50%; box-shadow: inset 0 0 0 3px var(--deep), inset 0 0 0 7px #ffc21a; }
+@media (max-width: 900px) {
+  .star-grid { grid-template-columns: 1fr; gap: 28px; padding-top: 40px; }
+  .br-d { display: none; }
+  .star-points { justify-content: flex-start; }
+  .star-points li { width: 50%; border-left: 0; padding: 4px 0; }
+}
+@media (max-width: 560px) { .star-btns { grid-template-columns: 1fr; } .sb { font-size: .98rem; } }
+
+/* 메인 01 옆: 사무실 박스 대신 업체 사진 */
+.memo-photo { margin: 0; align-self: start; }
+.memo-photo img { width: 100%; height: auto; display: block; }

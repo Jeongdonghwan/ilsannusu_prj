@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { CASES, CITIES, OPEN_PAGES, PLACES, openCities, cityPages, cityPath, pagePath, pageEncodedPath, inSitemap } from '../lib/data';
 import { TOOLS } from '../lib/compose';
-import { BRAND, CONTACT, PLACE, shareMeta } from '../lib/site';
+import { BRAND, CONTACT, PLACE, KAKAO, BLOG, tel, smsHref, shareMeta } from '../lib/site';
 import { faqJsonLd, itemListJsonLd } from '../lib/jsonld';
-import { Actions, IconArrow, JsonLd, SectionHead, Ticker } from '../components/Common';
+import { Actions, IconArrow, IconMsg, IconPhone, IconPin, JsonLd, SectionHead, Ticker } from '../components/Common';
 
 const HOME_TITLE = `${BRAND} | 일산 누수탐지·누수공사·하수구 막힘`;
 const HOME_DESC = '일산동구 정발산동의 누수탐지 전문업체. 열화상·청음식·가스식 탐지기 등 장비 6종으로 위치를 찾고 발생 부위만 수리합니다. 미해결 시 비용 0원, 연중무휴 긴급출동.';
@@ -40,19 +40,29 @@ export default function Home() {
   return (
     <main>
       <JsonLd data={[faqJsonLd(FAQ), itemListJsonLd(hubs.map((p) => ({ name: p.kw, path: pageEncodedPath(p) })))]} />
-      <section className="hero hero-home">
-        <div className="wrap hero-grid">
-          <div className="hero-text">
-            <p className="eyebrow">고양시 일산동구 정발산동 · 누수탐지 전문업체</p>
-            <h1><span><i>원인 위치부터 찾는 누수탐지,</i></span><span><i>{BRAND}</i></span></h1>
-            <p className="hero-lead">첨단 내시경과 탐지기로 원인만 짚어 고칩니다. 일산을 중심으로 김포·파주·은평구·마포까지, 서울·경기·인천 전지역 {CONTACT.hours}.</p>
-            <Actions place />
+      {/* 히어로: 업체 배너 구성 그대로 (2026-10-28 사용자 수정 요청) */}
+      <section className="hero hero-star">
+        <div className="wrap star-grid">
+          <div className="star-text">
+            <p className="star-eyebrow">누수탐지 <em>전문업체</em></p>
+            <h1><img src="/img/star-emblem.png" alt="" width={215} height={214} /><span>{BRAND}</span></h1>
+            <p className="star-lead">욕실누수, 천장누수, 화장실누수, 싱크대누수, 배관누수,<br className="br-d" /> 하수구막힘까지 누수 관련 상담 항목을 한 번에 확인해보세요.</p>
+            <div className="star-btns">
+              <a className="sb sb-tel" href={tel}><IconPhone /><span>전화문의 {CONTACT.phone}</span></a>
+              {KAKAO
+                ? <a className="sb sb-kakao" href={KAKAO} target="_blank" rel="noopener noreferrer"><IconMsg /><span>카카오톡 상담</span></a>
+                : <a className="sb sb-kakao" href={PLACE.url} target="_blank" rel="noopener noreferrer"><IconPin /><span>네이버 플레이스</span></a>}
+              <a className="sb sb-sms" href={smsHref}><IconMsg /><span>누수사진 문자 보내기</span></a>
+              <a className="sb sb-blog" href={BLOG} target="_blank" rel="noopener noreferrer"><span>블로그 작업사례 보기</span></a>
+            </div>
           </div>
-          <figure className="hero-photo">
-            <img src="/img/case-07.webp" alt={`${BRAND} 욕실 배수구 옆 타일을 열고 탐지기로 배관 누수를 확인하는 현장`} style={{ objectPosition: '50% 58%' }} />
-            <figcaption><b>시공 사진</b>욕실 배수구 옆 타일을 열고 누수 지점 확인</figcaption>
+          <figure className="star-photo">
+            <img src="/img/hero-star.webp" alt={`${BRAND} 기사가 싱크대 하부장 배관에 탐지 장비를 대고 누수를 확인하는 모습`} width={666} height={602} />
           </figure>
         </div>
+        <ul className="star-points wrap">
+          {['정확한 진단', '최소한의 공사', '합리적인 비용', '24시간 상담', '보험처리 지원', 'A/S 보장'].map((x) => <li key={x}>{x}</li>)}
+        </ul>
       </section>
 
       <Ticker items={tickerNames} />
@@ -66,12 +76,9 @@ export default function Home() {
               <p>{BRAND}는 내시경 카메라, 열화상 카메라, 음향 장비 등으로 벽·천장·바닥·지하 공간까지 정밀하게 탐지하고, 찾은 문제는 바로 고쳐 추가 손상을 막습니다. 변기·싱크대·하수구 막힘과 관로 문제, 언 수도 녹임(해빙)도 함께 처리합니다.</p>
               <p>수리로 끝내지 않고 작업 전후 상세 설명과 투명한 비용 안내, 정기 점검, 누수 보험 상담, 피해 복구 공사까지 지원합니다. 문제를 해결하지 못하면 비용은 0원입니다.</p>
             </div>
-            <aside className="memo" data-reveal>
-              <h3>사무실</h3>
-              <ol><li>경기 고양시 일산동구 대산로31번길 29 1층</li><li>정발산동 · 저동초등학교 인근</li><li>대표 {CONTACT.phone}</li></ol>
-              <h3>자격</h3>
-              <p>국가공인 자격증 보유 (홈페이지 표기)</p>
-            </aside>
+            <figure className="memo-photo" data-reveal>
+              <img src="/img/office-star.webp" alt={`${BRAND} 누수탐지·누수공사 기사가 청음 장비로 바닥 누수를 듣는 모습`} width={706} height={635} loading="lazy" />
+            </figure>
           </div>
         </section>
 
@@ -97,7 +104,7 @@ export default function Home() {
 
       <section className="cta-band" data-reveal>
         <div className="wrap cta-band-in">
-          <p>아래층 천장 얼룩, 도는 계량기, 떨어지는 보일러 압력. 셋 중 하나면 위치 확인부터.</p>
+          <p>아래층 천장 얼룩, 도는 계량기, 떨어지는 보일러 압력<br />셋 중 하나면 위치 확인부터</p>
           <Actions sms={false} />
         </div>
       </section>
@@ -144,8 +151,8 @@ export default function Home() {
 
       <section className="closing">
         <div className="wrap" data-reveal>
-          <h2>주소와 증상만 알려 주세요</h2>
-          <p>건물 종류, 처음 젖은 날, 계량기 상태를 들으면 가져갈 장비와 일정이 정해집니다. 상담·견적은 무료입니다.</p>
+          <h2>주소와 증상만 알려주세요</h2>
+          <p>상담·견적은 무료입니다.</p>
           <Actions />
         </div>
       </section>
