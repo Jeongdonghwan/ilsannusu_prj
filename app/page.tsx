@@ -45,7 +45,7 @@ export default function Home() {
         <div className="wrap star-grid">
           <div className="star-text">
             <p className="star-eyebrow">누수탐지 <em>전문업체</em></p>
-            <h1><img src="/img/star-emblem.png" alt="" width={215} height={214} /><span>{BRAND}</span></h1>
+            <h1><img src="/img/star-emblem.png" alt="스타누수탐지 STAR 로고" width={215} height={214} /><span>{BRAND}</span></h1>
             <p className="star-lead">욕실누수, 천장누수, 화장실누수, 싱크대누수, 배관누수,<br className="br-d" /> 하수구막힘까지 누수 관련 상담 항목을 한 번에 확인해보세요.</p>
             <div className="star-btns">
               <a className="sb sb-tel" href={tel}><IconPhone /><span>전화문의 {CONTACT.phone}</span></a>
