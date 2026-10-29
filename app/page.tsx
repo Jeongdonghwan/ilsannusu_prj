@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { CASES, CITIES, OPEN_PAGES, PLACES, openCities, cityPages, cityPath, pagePath, pageEncodedPath, inSitemap } from '../lib/data';
 import { TOOLS } from '../lib/compose';
+import { getPosts, postPath } from '../lib/blog';
 import { BRAND, CONTACT, PLACE, KAKAO, BLOG, tel, smsHref, shareMeta } from '../lib/site';
 import { faqJsonLd, itemListJsonLd } from '../lib/jsonld';
 import { Actions, IconArrow, IconMsg, IconPhone, IconPin, JsonLd, SectionHead, Ticker } from '../components/Common';
@@ -35,6 +36,7 @@ export default function Home() {
   const cities = openCities();
   // 메인 캐러셀: 시·구 대표 페이지 + 열린 생활권 대표 페이지 (최대 30)
   const hubs = OPEN_PAGES.filter((p) => inSitemap(p) && !p.mod && p.service === '누수탐지').slice(0, 30);
+  const posts = getPosts().slice(0, 5);
   const tickerNames = Array.from(new Set(OPEN_PAGES.map((p) => PLACES[p.place].name))).slice(0, 24);
 
   return (
@@ -146,6 +148,12 @@ export default function Home() {
         <section className="sec">
           <SectionHead no="06" title="자주 묻는 질문" />
           <div className="faq">{FAQ.map((f) => <details key={f.q} data-reveal><summary>{f.q}<i /></summary><p>{f.a}</p></details>)}</div>
+        </section>
+
+        <section className="sec">
+          <SectionHead no="07" title="누수 궁금증 블로그" sub="아랫집 누수 책임, 누수 보험, 수도요금처럼 상담 때 자주 받는 질문을 글로 정리합니다." />
+          {posts.length > 0 && <ul className="linklist">{posts.map((p) => <li key={p.slug}><Link href={postPath(p)}>{p.title}<IconArrow /></Link></li>)}</ul>}
+          <p data-reveal><Link href="/blog/" className="more">블로그 글 전체 보기 <IconArrow /></Link></p>
         </section>
       </div>
 

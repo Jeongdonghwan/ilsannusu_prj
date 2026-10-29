@@ -9,6 +9,7 @@
 | `/area/`, `/area/<시구>/` | 지역 허브 (일산·김포·파주·은평구·마포) — 열린 키워드 페이지 전부로 가는 크롤 경로 |
 | `/<키워드>/` | 키워드 페이지 510개 |
 | `/cases/` | 시공 사진 7장 (현장사진 게시판, 2026.02.24 게시) |
+| `/blog/`, `/blog/<한글슬러그>/` | 누수 궁금증 블로그 — `content/blog/*.md` (`_` 시작 = 비공개, `_example.md` = 톤 예시). 프런트매터 `date`(없으면 `publishedAt`)가 빌드일(env `BUILD_DATE`, 없으면 KST 오늘)보다 미래면 목록·글·sitemap·rss·og 모두 제외 → 미리 써 두고 날짜로 공개. 키워드 큐 `content/blog/_data/keywordQueue.json`(50개, 지역+서비스 금지), 스크립트 `scripts/drip/` |
 | `/sitemap.xml`, `/robots.txt`, `/rss.xml` | 열린 단계의 대표 페이지만 |
 
 ## 단계 오픈 (`OPEN_WAVE`)

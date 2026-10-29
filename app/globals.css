@@ -386,3 +386,17 @@ button { font: inherit; }
 /* 메인 01 옆: 사무실 박스 대신 업체 사진 */
 .memo-photo { margin: 0; align-self: start; }
 .memo-photo img { width: 100%; height: auto; display: block; }
+
+/* 블로그 */
+.post { margin-top: 36px; }
+.post section { padding: 8px 0 18px; }
+.post h2 { font-size: clamp(1.25rem, 2.6vw, 1.6rem); letter-spacing: -0.03em; margin: 22px 0 14px; padding-left: 14px; border-left: 4px solid var(--accent); }
+.post ul { margin: 0 0 16px; padding-left: 1.2em; max-width: 700px; }
+.post li { padding: 4px 0; }
+.post a { color: var(--navy-2); font-weight: 700; text-underline-offset: 3px; }
+.post-list { list-style: none; margin: 0; padding: 0; }
+.post-list a { display: block; padding: 22px 0; border-bottom: 1px solid var(--line); text-decoration: none; transition: padding .3s var(--ease); }
+.post-list a:hover { padding-left: 10px; }
+.post-list h3 { margin: 4px 0 6px; font-size: 1.2rem; letter-spacing: -0.03em; }
+.post-list p { margin: 0; color: var(--muted); max-width: 760px; }
+.post-list .meta { font-size: .85rem; color: var(--accent); font-weight: 700; }

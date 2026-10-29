@@ -8,6 +8,7 @@ cd "$(dirname "$0")/.."
 python -I scripts/make_og.py  # og 이미지(public/og, git 제외) 없는 것만 생성
 rm -rf out
 OPEN_WAVE=$WAVE SITE_URL=$URL npx next build
+rm -rf out/blog/_none  # 글 0편일 때 빌드용 자리표시 (app/blog/[slug]/page.tsx)
 grep -q "$URL" out/sitemap.xml || { echo "sitemap에 도메인이 없음"; exit 1; }
 # 열린 페이지가 쓰는 og 이미지만 남긴다 (안 열린 키워드 파일명 노출·용량 방지)
 python -I - <<'PY'
@@ -15,6 +16,7 @@ import json, os, urllib.parse
 from pathlib import Path
 out = Path('out')
 keep = {'home', 'area', 'cases'} | {f'area-{d.name}' for d in (out / 'area').iterdir() if d.is_dir()}
+keep |= {'blog'} | ({f'blog-{d.name}' for d in (out / 'blog').iterdir() if d.is_dir()} if (out / 'blog').is_dir() else set())
 keep |= {p['slug'] for p in json.load(open('data/site-pages.json', encoding='utf-8'))['pages'] if (out / p['slug'] / 'index.html').exists()}
 n = 0
 for f in (out / 'og').glob('*.jpg'):

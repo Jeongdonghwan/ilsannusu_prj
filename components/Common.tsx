@@ -64,7 +64,7 @@ export const Footer = () => (
       <div>
         <strong className="foot-brand">{BRAND}</strong>
         <p>누수탐지 · 누수공사 · 하수구막힘 · 고압세척<br />일산·김포·파주·은평·마포·강서지역 출장상담 {CONTACT.hours}</p>
-        <p><Link href="/area/">지역 안내</Link> · <Link href="/cases/">시공 사진</Link> · <a href="/rss.xml">RSS</a></p>
+        <p><Link href="/area/">지역 안내</Link> · <Link href="/cases/">시공 사진</Link> · <Link href="/blog/">블로그</Link> · <a href="/rss.xml">RSS</a></p>
       </div>
       <ul className="foot-info">
         {BUSINESS.ceo && <li><span>대표</span>{BUSINESS.ceo}</li>}

@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { SITE_URL } from '../lib/site';
+import { getPosts, postEncodedPath } from '../lib/blog';
 import { OPEN_PAGES, PLACES, openCities, cityEncodedPath, pageEncodedPath, inSitemap } from '../lib/data';
 
 // 빌드 시 out/sitemap.xml — 열린 단계(OPEN_WAVE)의 대표 페이지만 (표기 변형은 canonical 대상이라 제외)
@@ -9,6 +10,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/`, lastModified: now, changeFrequency: 'weekly', priority: 1 },
     { url: `${SITE_URL}/area/`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
     { url: `${SITE_URL}/cases/`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${SITE_URL}/blog/`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
+    ...getPosts().map((p) => ({ url: `${SITE_URL}${postEncodedPath(p)}`, lastModified: new Date(p.publishedAt || now), changeFrequency: 'monthly' as const, priority: 0.6 })),
     ...openCities().map((c) => ({ url: `${SITE_URL}${cityEncodedPath(c)}`, lastModified: now, changeFrequency: 'weekly' as const, priority: 0.8 })),
     ...OPEN_PAGES.filter(inSitemap).map((p) => ({
       url: `${SITE_URL}${pageEncodedPath(p)}`,
