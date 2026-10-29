@@ -36,7 +36,7 @@ export const PLACE = {
 };
 
 // 순차 오픈: 이 단계 이하의 페이지만 빌드·사이트맵·내부링크에 포함된다.
-//   OPEN_WAVE=1 npm run build  (1 = 시·구 83 / 2 = +생활권 255 / 3 = 전체 510)
+//   OPEN_WAVE=1 npm run build  (post-launch 7일 오픈: 1 = 10/28 시·구 83 / 2 = 10/30 255 / 3 = 11/1 383 / 4 = 11/3 전체 510 — scripts/drip/rebatch.py)
 export const OPEN_WAVE = Number(process.env.OPEN_WAVE || 3);
 
 // 표기만 다른 키워드 페이지(일산/고양 일산/고양시 일산, 주엽/주엽동 …)는 대표 페이지로 canonical + 사이트맵 제외
@@ -54,3 +54,7 @@ export const shareMeta = (key: string, alt: string, o: { title?: string; descrip
     twitter: { card: 'summary_large_image' as const, title: o.title, description: o.description, images },
   };
 };
+
+// 서치어드바이저(네이버)·서치콘솔(구글) HTML 태그 소유확인 — content 값만
+export const NAVER_VERIFY = '';
+export const GOOGLE_VERIFY = '';

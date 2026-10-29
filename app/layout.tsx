@@ -3,13 +3,13 @@ import './globals.css';
 import { Header, Footer, StickyBar, JsonLd } from '../components/Common';
 import Motion from '../components/Motion';
 import { businessJsonLd, webSiteJsonLd } from '../lib/jsonld';
-import { SITE_URL, BRAND } from '../lib/site';
+import { SITE_URL, BRAND, NAVER_VERIFY, GOOGLE_VERIFY } from '../lib/site';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: { default: `${BRAND} | 일산 누수탐지·누수공사`, template: `%s` },
   robots: { index: true, follow: true },
-  // TODO: 서치어드바이저·서치콘솔 소유확인 코드 (verification: { other: { 'naver-site-verification': '...' } })
+  verification: { google: GOOGLE_VERIFY || undefined, other: NAVER_VERIFY ? { 'naver-site-verification': NAVER_VERIFY } : undefined },
 };
 
 export const viewport: Viewport = { themeColor: '#0a1d30', width: 'device-width', initialScale: 1 };
