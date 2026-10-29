@@ -68,8 +68,11 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
           {p.sections.map((s, i) => (
             <section key={s.h} data-reveal>
               <h2>{s.h}</h2>
-              {s.p.map((t, j) => <p key={j} className={i === 0 && j === 0 ? 'first' : ''}><Inline text={t} /></p>)}
-              {s.list.length > 0 && <ul>{s.list.map((t) => <li key={t}><Inline text={t} /></li>)}</ul>}
+              {s.blocks.map((b, j) => {
+                if (typeof b === 'string') return <p key={j} className={i === 0 && j === 0 ? 'first' : ''}><Inline text={b} /></p>;
+                const Tag = b.ol ? 'ol' : 'ul';
+                return <Tag key={j}>{b.items.map((t, k) => <li key={k}><Inline text={t} /></li>)}</Tag>;
+              })}
             </section>
           ))}
         </article>

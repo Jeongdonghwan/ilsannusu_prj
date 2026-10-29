@@ -4,7 +4,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-export interface Section { h: string; p: string[]; list: string[] }
+// 블록은 본문 순서 그대로: 문자열 = 문단, { ol, items } = 목록('- ' 또는 '1. ')
+export type Block = string | { ol: boolean; items: string[] };
+export interface Section { h: string; blocks: Block[] }
 export interface Post {
   slug: string; title: string; description: string; keyword: string; pattern?: string;
   publishedAt: string; sections: Section[];
@@ -29,11 +31,15 @@ function toSections(body: string): Section[] {
   let cur: Section | null = null;
   for (const line of body.split(/\r?\n/)) {
     const h = line.match(/^##\s+(.*)$/);
-    if (h) { if (cur) out.push(cur); cur = { h: h[1].trim(), p: [], list: [] }; continue; }
+    if (h) { if (cur) out.push(cur); cur = { h: h[1].trim(), blocks: [] }; continue; }
     if (!cur) continue;
-    const li = line.match(/^[-*]\s+(.*)$/);
-    if (li) cur.list.push(li[1].trim());
-    else if (line.trim()) cur.p.push(line.trim());
+    const li = line.match(/^(?:([-*])|\d+\.)\s+(.*)$/);
+    if (li) {
+      const ol = !li[1];
+      const last = cur.blocks[cur.blocks.length - 1];
+      if (typeof last === 'object' && last.ol === ol) last.items.push(li[2].trim());
+      else cur.blocks.push({ ol, items: [li[2].trim()] });
+    } else if (line.trim()) cur.blocks.push(line.trim());
   }
   if (cur) out.push(cur);
   return out;
