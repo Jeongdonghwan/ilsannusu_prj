@@ -7,7 +7,7 @@
 |---|---|
 | `/` | 메인: 회사 소개·주요업무(홈페이지 문구), 장비 6종, 시공 사진 레일, 지역 |
 | `/area/`, `/area/<시구>/` | 지역 허브 (일산·김포·파주·은평구·마포) — 열린 키워드 페이지 전부로 가는 크롤 경로 |
-| `/<키워드>/` | 키워드 페이지 510개 |
+| `/<키워드>/` | 키워드 페이지 510개 + 오픈 뒤 추가 793개 (`keywords/스타누수탐지_추가키워드.xlsx`) |
 | `/cases/` | 시공 사진 7장 (현장사진 게시판, 2026.02.24 게시) |
 | `/blog/`, `/blog/<한글슬러그>/` | 누수 궁금증 블로그 — `content/blog/*.md` (`_` 시작 = 비공개, `_example.md` = 톤 예시). 프런트매터 `date`(없으면 `publishedAt`)가 빌드일(env `BUILD_DATE`, 없으면 KST 오늘)보다 미래면 목록·글·sitemap·rss·og 모두 제외 → 미리 써 두고 날짜로 공개. 키워드 큐 `content/blog/_data/keywordQueue.json`(50개, 지역+서비스 금지), 스크립트 `scripts/drip/` |
 | `/sitemap.xml`, `/robots.txt`, `/rss.xml` | 열린 단계의 대표 페이지만 |
@@ -15,7 +15,7 @@
 ## 단계 오픈 (`OPEN_WAVE`)
 
 오픈 후 7일 안 4번 나눠 오픈 (post-launch 스킬, 2026-10-29). 순서는 시군구 → 생활권 → 동 그대로, wave 값은 `scripts/drip/rebatch.py --plan 50,75,100 --keep-first` 로 다시 매김.
-`build_pages.py` 를 다시 돌리면 wave 가 원래 단계로 돌아가므로 그 뒤 rebatch 를 꼭 다시 돌린다. 오늘 열 묶음: `python -I scripts/drip/drip_status.py data/drip.json`
+`build_pages.py` 는 지금 `data/site-pages.json` 의 wave 를 이어받는다(2026-11 부터). rebatch 는 다시 돌리지 않는다. 오늘 열 묶음: `python -I scripts/drip/drip_status.py data/drip.json`
 
 | 묶음 | 날짜 | 누적 페이지 |
 |---|---|---|
@@ -23,14 +23,19 @@
 | 2 | 10/30 | 255 (50%) |
 | 3 | 11/1 | 383 (75%) |
 | 4 | 11/3 | 510 (100%) |
+| 5 | 11/12 (추가) | 907 |
+| 6 | 11/14 (추가) | 1,303 |
 
 ```bash
-python -I scripts/build_pages.py   # 원본 엑셀 + 추가 29개 → data/site-pages.json + keywords/누수탐지_일산_510.xlsx
+python -I scripts/build_pages.py   # 원본 엑셀 + 추가 29개 + EXTRA 793 → data/site-pages.json + 엑셀 2개
 python -I scripts/places_src.py    # 지역 데이터 → data/places.json
 python -I scripts/make_og.py       # 페이지별 og 이미지 (public/og, 없는 것만)
 OPEN_WAVE=1 SITE_URL=https://도메인 npx next build
 bash scripts/deploy.sh <단계> <https://도메인>
 ```
+### 오픈 뒤 추가 793개 (wave 5·6, `data/drip.json` extra)
+원본 엑셀 481행은 모두 페이지가 있어, `build_pages.py` EXTRA 가 영업 지역(5개 시·구) 장소 × 이미 쓰는 서비스 축(누수공사·배관누수·아파트/빌라/화장실/천장/난방배관/수도 누수·하수구막힘·고압세척)을 만든다. 건물 형태에 맞는 서비스만, 민간인통제선 안 마을 제외. 마포구 행정동 14곳 + 홍대를 `places_src.py` 에 추가. 순서 시·구 → 마포 새 동네 누수탐지 → 생활권 → 동·읍면, 앞 절반 5 · 뒤 절반 6. `build_pages.py` 는 기존 wave(rebatch 결과)를 이어받으므로 다시 돌려도 기존 묶음은 그대로. 서비스 페이지 문장은 `compose.ts` SVC_MORE·TOOL_SVC.
+
 표기만 다른 페이지(고양 일산/고양시 일산 → 일산, 주엽동 → 주엽, 은평 → 은평구 …)는 `MERGE_VARIANTS`로 대표 페이지에 canonical, 사이트맵 제외.
 
 ## 사실 근거 (지어낸 수치 없음)

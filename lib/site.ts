@@ -36,7 +36,8 @@ export const PLACE = {
 };
 
 // 순차 오픈: 이 단계 이하의 페이지만 빌드·사이트맵·내부링크에 포함된다.
-//   OPEN_WAVE=1 npm run build  (post-launch 7일 오픈: 1 = 10/28 시·구 83 / 2 = 10/30 255 / 3 = 11/1 383 / 4 = 11/3 전체 510 — scripts/drip/rebatch.py)
+//   OPEN_WAVE=1 npm run build  (post-launch 7일 오픈: 1 = 10/28 시·구 83 / 2 = 10/30 255 / 3 = 11/1 383 / 4 = 11/3 전체 510 — scripts/drip/rebatch.py
+//   오픈 뒤 추가 793: 5 = 11/12 (397) / 6 = 11/14 (396) — data/drip.json extra)
 export const OPEN_WAVE = Number(process.env.OPEN_WAVE || 3);
 
 // 표기만 다른 키워드 페이지(일산/고양 일산/고양시 일산, 주엽/주엽동 …)는 대표 페이지로 canonical + 사이트맵 제외
