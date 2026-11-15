@@ -1,6 +1,6 @@
 // 공통 UI — 이모지 없이 선 아이콘, 각진 버튼, 번호 붙은 섹션 머리.
 import Link from 'next/link';
-import { BRAND, CONTACT, BUSINESS, PLACE, tel, smsHref } from '../lib/site';
+import { BRAND, CONTACT, BUSINESS, PLACE, UPDATED, tel, smsHref } from '../lib/site';
 
 export const JsonLd = ({ data }: { data: object | object[] }) => (
   <>{(Array.isArray(data) ? data : [data]).map((d, i) => <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(d) }} />)}</>
@@ -64,7 +64,7 @@ export const Footer = () => (
       <div>
         <strong className="foot-brand">{BRAND}</strong>
         <p>누수탐지 · 누수공사 · 하수구막힘 · 고압세척<br />일산·김포·파주·은평·마포·강서지역 출장상담 {CONTACT.hours}</p>
-        <p><Link href="/area/">지역 안내</Link> · <Link href="/cases/">시공 사진</Link> · <Link href="/blog/">블로그</Link> · <a href="/rss.xml">RSS</a></p>
+        <p><Link href="/about/">소개</Link> · <Link href="/area/">지역 안내</Link> · <Link href="/cases/">시공 사진</Link> · <Link href="/blog/">블로그</Link> · <a href="/rss.xml">RSS</a></p>
       </div>
       <ul className="foot-info">
         {BUSINESS.ceo && <li><span>대표</span>{BUSINESS.ceo}</li>}
@@ -74,7 +74,7 @@ export const Footer = () => (
         <li><span>지도·리뷰</span><a href={PLACE.url} target="_blank" rel="noopener noreferrer">네이버 플레이스(지도·리뷰) 보기</a></li>
       </ul>
     </div>
-    <div className="wrap foot-bottom">© {new Date().getFullYear()} {BRAND} · 상담 때 받은 주소·연락처는 출동과 견적 안내에만 씁니다.</div>
+    <div className="wrap foot-bottom">© {new Date().getFullYear()} {BRAND} · 상담 때 받은 주소·연락처는 출동과 견적 안내에만 씁니다. · 최종 수정 <time dateTime={UPDATED}>{UPDATED}</time></div>
   </footer>
 );
 

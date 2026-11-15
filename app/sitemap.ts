@@ -9,8 +9,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     { url: `${SITE_URL}/`, lastModified: now, changeFrequency: 'weekly', priority: 1 },
     { url: `${SITE_URL}/area/`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${SITE_URL}/cases/`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
-    { url: `${SITE_URL}/blog/`, lastModified: now, changeFrequency: 'daily', priority: 0.7 },
+    { url: `${SITE_URL}/about/`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${SITE_URL}/cases/`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${SITE_URL}/blog/`, lastModified: now, changeFrequency: 'daily', priority: 0.8 },
     ...getPosts().map((p) => ({ url: `${SITE_URL}${postEncodedPath(p)}`, lastModified: new Date(p.publishedAt || now), changeFrequency: 'monthly' as const, priority: 0.6 })),
     ...openCities().map((c) => ({ url: `${SITE_URL}${cityEncodedPath(c)}`, lastModified: now, changeFrequency: 'weekly' as const, priority: 0.8 })),
     ...OPEN_PAGES.filter(inSitemap).map((p) => ({
