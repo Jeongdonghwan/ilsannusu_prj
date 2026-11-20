@@ -8,7 +8,7 @@ import { faqJsonLd, itemListJsonLd } from '../lib/jsonld';
 import { Actions, IconArrow, IconMsg, IconPhone, IconPin, JsonLd, SectionHead, Ticker } from '../components/Common';
 
 const HOME_TITLE = `${BRAND} | 일산 누수탐지·누수공사·하수구 막힘`;
-const HOME_DESC = '일산동구 정발산동의 누수탐지 전문업체. 열화상·청음식·가스식 탐지기 등 장비 6종으로 위치를 찾고 발생 부위만 수리합니다. 미해결 시 비용 0원, 연중무휴 긴급출동.';
+const HOME_DESC = '일산동구 정발산동 누수탐지 업체. 열화상·청음식·가스식 장비 6종으로 새는 곳을 찾아 그 부위만 수리, 연중무휴 긴급출동.';
 export const metadata: Metadata = {
   title: HOME_TITLE,
   description: HOME_DESC,
