@@ -461,7 +461,22 @@ export function compose(p: Page): Composed {
     전문업체: `${lb} 누수탐지 전문업체 ${BRAND} — 누수탐지·누수공사, 하수구 막힘, 고압세척, 언수도 해빙.`,
     업체: `${lb} 누수탐지업체에 전화하기 전 정리할 것과 진행 순서. 연중무휴 긴급출동, 무료견적.`,
   };
-  const description = `${descBody[p.service === '누수탐지' ? p.mod : '']} ${BRAND} ${CONTACT.phone}`;
+  // description 45~80자 (§5-3, 2026-11-24): 키워드 — 관련 키워드 2~3개 + 페이지 사실 + 상담 전화. 80자 넘으면 문장·단어 수를 줄인다.
+  void descBody;
+  const dSpot = rotate(P.spots.filter((x) => !x.includes(nm)), s, 'dspot')[0]?.replace(/ 방향$/, '');
+  const DREL: Record<string, [string[], (w: string) => string]> = {
+    '': [['열화상', '청음식', '가스식'], (w) => `${w} 장비로 ${svc.short} 위치 확인`],
+    비용: [['탐지 범위', '배관 종류', '복구 면적'], (w) => `${j(w, '으로')} 정하는 비용`],
+    가격: [['탐지만', '탐지와 수리', '복구 포함'], (w) => `${w} 중 어디까지인지로 갈리는 견적`],
+    잘하는곳: [['장비 6종', '부분 수리', '미해결 시 0원'], (w) => `${j(w, '으로')} 비교하는 기준`],
+    전문업체: [['누수공사', '하수구 막힘', '고압세척'], (w) => `${w}까지 맡는 업체`],
+    업체: [['계량기', '보일러 압력', '보험 가입'], (w) => `${w} 확인 뒤 연락하는 순서`],
+  };
+  const [dw, dt] = p.service === '누수탐지' ? DREL[p.mod] : [(SVC_MORE[p.service]?.look || svc.symptoms[0]).split(',').map((x) => x.trim()).filter(Boolean), (w: string) => `${w}부터 보는 순서`];
+  const dline = (n: number) => dt(dw.slice(0, n).join('·'));
+  const dfact = dSpot ? `${dSpot} 주변 ${CTX_NOUN[ctxOf(P)]} 현장 상담` : `${CTX_NOUN[ctxOf(P)]} 현장 상담`;
+  const description = [3, 2].flatMap((n) => [`${p.kw} — ${dline(n)}. ${dfact} ${CONTACT.phone}`, `${p.kw} — ${dline(n)}. 상담 ${CONTACT.phone}`])
+    .find((x) => x.length <= 80) || `${p.kw} — ${dline(1)}. ${CONTACT.phone}`;
 
   const eyebrow = P.kind === '시구' ? C.full : P.admin;
   const lead = pick(p.service !== '누수탐지' ? [
@@ -569,7 +584,7 @@ export function compose(p: Page): Composed {
       { title: '현장 확인', text: `${nm} ${cn}의 계량기·밸브·보일러 압력으로 어느 배관 계통인지 나누고 탐지 범위를 정합니다.` },
       { title: '비용 설명', text: `확인한 범위로 ${modWord || '비용'}을 먼저 말씀드리고, 동의하신 뒤 탐지를 시작합니다.` },
       { title: '탐지·수리', text: `장비로 위치를 짚고 발생 부위만 열어 고칩니다. ${lb} 공사 범위가 커지면 다시 설명합니다.` },
-      { title: '마무리', text: `복구와 결과 설명. 해결하지 못하면 비용을 받지 않습니다. ${lb} 보험 서류가 필요하면 함께 챙깁니다.` },
+      { title: '마무리', text: `복구한 뒤 결과를 설명합니다. 해결하지 못하면 비용을 받지 않습니다. ${lb} 보험 서류가 필요하면 함께 챙깁니다.` },
     ],
     pick: [
       { title: '증상 듣기', text: `${nm} 건물 종류와 처음 젖은 날, 범위가 커지는지부터 여쭙니다.` },
@@ -632,4 +647,156 @@ export function compose(p: Page): Composed {
     title, description, h1: p.kw, eyebrow, lead, label: lb, answer, summary, heroCase, intro, region, view, symptoms, tools,
     cases, steps, stepsHeading: `${lb} ${svc.short} 진행 순서`, info, faq, closing, ticker, cta,
   };
+}
+
+// ---- 레이 모범 구조 (2026-11-24) — 분류 줄 → h1(키워드+수식어) → 설명 → 핵심 요약 → 번호 절 6개(한 문단) → FAQ → 관련 링크 ----
+// 규칙: ~/.claude/skills/programmatic-seo/references/composer-patterns.md §5-1·5-2. 사실은 위 compose() 재료 안에서만.
+export interface Ray { cat: string; h1sub: string; summary: string; sections: { h: string; p: string }[] }
+const KW_AT = new Set([0, 1, 2, 4]); // 절 6개 중 4개 h2 에 키워드 전체
+const SEQ = ['먼저', '이어서', '그다음', '그 뒤에는', '끝으로'];
+const CTX_H1: Record<Ctx, string> = { apt: '세대 바닥·욕실 배관', villa: '세대 사이 배관', house: '마당·땅속 배관' };
+
+export function composeRay(p: Page, c: Composed = compose(p)): Ray {
+  const P = PLACES[p.place];
+  const C = CITIES[p.city];
+  const svc = SVC[p.service];
+  const more = SVC_MORE[p.service];
+  const s = p.slug;
+  const lb = p.label;
+  const nm = P.name;
+  const cx = ctxOf(P);
+  const cn = CTX_NOUN[cx];
+  const spot = rotate(P.spots.filter((x) => !x.includes(nm) && !x.includes(lb)), s, 'h1spot')[0]?.replace(/ 방향$/, '');
+  const head = (i: number, subs: string[]) => { const sub = pick(subs, s, `h2-${i}`); return KW_AT.has(i) ? `${p.kw}: ${sub}` : sub; };
+  const t = (i: number) => TOOLS[svc.tools[i]].name;
+  const modWord = p.mod === '업체' || p.mod === '' ? '비용' : p.mod;
+
+  // h1 수식어 — 키워드에 이미 있는 지역명은 쓰지 않는다
+  const near = spot ? `${spot} 주변` : '우리 동네';
+  const h1sub = pick(p.service !== '누수탐지' ? [
+    `${more ? more.look.split(',')[0].trim() : svc.symptoms[0]}부터 보는 순서`,
+    `${near} ${cn} 현장 진행 순서`,
+    `${t(0)}·${j(t(1), '으로')} 확인하고 고치기`,
+  ] : p.mod === '비용' || p.mod === '가격' ? [
+    `탐지 범위·배관 종류·복구 면적으로 정하는 ${modWord}`,
+    `${near} 현장 견적 기준`,
+    '무료견적, 원인 못 찾으면 0원',
+  ] : p.mod === '잘하는곳' ? [
+    '장비 6종·덜 깨는 수리로 비교하기',
+    '고를 때 물어볼 여섯 가지',
+    `${near} 출동 업체 고르는 기준`,
+  ] : p.mod === '전문업체' ? [
+    '누수탐지·누수공사·하수구 막힘까지',
+    '국가공인 자격증 보유, 장비 6종',
+    `${near} 현장까지 연중무휴 출동`,
+  ] : p.mod === '업체' ? [
+    '전화 전에 정리할 것과 진행 순서',
+    '연중무휴 긴급출동, 무료견적',
+    `${near} 현장 상담 안내`,
+  ] : [
+    spot ? `${spot} 주변 현장, 위치부터 찾기` : '우리 집 누수 위치부터 찾기',
+    '계량기 확인부터 부분 수리까지',
+    `${CTX_H1[cx]}부터 짚는 탐지 순서`,
+  ], s, 'h1sub');
+
+  // 핵심 요약 — 결론 3~4문장
+  const firstLook = more ? more.look.split(',')[0].trim() : { apt: '세대 밸브와 바닥 배관', villa: '세대 사이 배관과 공용 배관', house: '계량기와 땅속 급수관' }[cx];
+  // 고정 문장에 현장 이름을 붙여 같은 주제 페이지끼리 문장이 겹치지 않게 (이미 지역이 든 문장은 그대로)
+  const loc = (i: number, x: string) => (x.includes(nm) || x.includes(lb) ? x : `${pick([`${nm} 현장에서 `, `${nm}에서도 `, ''], s, `loc${i}`)}${x}`);
+  const summary = [
+    p.service === '누수탐지' ? c.answer : `${lb} ${j(svc.short, '은')} ${svc.aim}입니다. ${nm} 현장도 장비로 위치를 짚은 뒤 ${end(svc.work)}`,
+    `${nm}에는 ${j(P.homes, '이')} 많아 ${j(firstLook, '을')} 먼저 확인합니다.`,
+    pick([
+      `${nm} 상담과 견적은 무료이고, 문제를 해결하지 못하면 비용을 받지 않습니다.`,
+      `${nm} 현장도 견적은 무료이며, 원인을 찾지 못하면 비용 0원입니다.`,
+    ], s, 'sum3'),
+  ].join(' ');
+
+  // 01 현장
+  const s0 = [c.region.paras[0], c.intro[0], c.region.paras[1]].join(' ');
+
+  // 02 관점(의도)
+  const viewP: Record<string, string[]> = {
+    '': [
+      `누수탐지는 ${SVC.누수탐지.aim}입니다. ${BRAND}는 계량기와 밸브로 어느 배관 계통인지 먼저 나누고 그다음에 장비로 위치를 좁힙니다. ${c.view.paras[1]}`,
+      `${nm} 현장도 순서는 같습니다. 물을 모두 잠근 상태에서 계량기가 도는지 보고, 급수·온수·난방 밸브를 하나씩 잠가 계통을 나눈 뒤 장비로 지점을 짚습니다. ${c.view.paras[1]}`,
+    ],
+    비용: [
+      `${BRAND} 홈페이지에는 정해진 단가표 대신 무료견적 상담, 작업 전후 설명과 투명한 비용 안내, 문제 미해결 시 비용 0원이 적혀 있습니다. ${nm}의 ${j(P.homes, '은')} 건물마다 배관 길이와 바닥 마감이 달라 탐지 시간과 공사 범위가 다릅니다. 그래서 탐지 범위가 한 세대 안인지, 몇 개 계통을 보는지, 배관을 바꾸는지, 복구 면적이 얼마인지로 비용을 정합니다.`,
+      `${lb} 누수탐지 비용은 네 가지로 갈립니다. 한 세대 안만 보는지 위·아래층과 외부 배관까지 보는지, 급수·온수·난방·배수 가운데 몇 계통인지, 발생 부위를 열어 배관을 바꾸는지, ${nm} 현장 바닥 마감을 얼마나 되돌리는지입니다. ${CTX_LINE[cx]} 누수 보험 상담이 필요하면 그 범위도 함께 말씀드립니다.`,
+    ],
+    가격: [
+      `${c.view.paras[0]} 견적은 탐지만 하는 경우, 탐지 뒤 발생 부위만 열어 배관을 바꾸는 경우, ${nm} 현장 마감재에 맞춰 바닥·벽까지 복구하는 경우로 나뉩니다.`,
+      `${lb} 누수탐지 가격은 '탐지만', '탐지와 수리', '복구 포함' 가운데 어디까지 하느냐로 달라집니다. ${c.view.paras[1]} 원인을 찾지 못하면 비용을 받지 않는다는 것도 홈페이지 안내입니다.`,
+    ],
+    잘하는곳: [
+      `잘한다는 말은 원인 위치를 정확히 짚어 덜 깨고 한 번에 고친다는 뜻입니다. ${nm} 현장(${P.homes})에서 업체를 고를 때는 장비가 몇 종류인지, 발생 부위만 고치는지, 작업 전후 설명과 비용 안내가 있는지, 못 찾았을 때 비용을 받는지, 자격이 있는지, 언제 올 수 있는지를 물어보세요. ${BRAND}는 장비 6종과 국가공인 자격증을 갖추고 연중무휴로 출동합니다.`,
+      `${CTX_LINE[cx]} 이런 현장일수록 장비 종류가 차이를 만듭니다. 한 장비로 안 잡히는 누수가 다른 방식으로 잡히기 때문입니다. ${nm}에서 업체를 비교할 때는 장비, 덜 깨는 수리, 작업 전후 설명, 미해결 시 비용, 자격, 출동 시간 여섯 가지를 보세요. ${BRAND} 홈페이지에는 장비 6종, 미해결 시 0원, 국가공인 자격증 보유가 적혀 있습니다.`,
+    ],
+    전문업체: [
+      `${c.view.paras[0]} ${nm} 쪽 문의도 같은 장비와 같은 순서로 보고, 공사 뒤에는 정기 점검과 누수 보험 상담, 피해 복구 공사를 지원합니다.`,
+      `${BRAND}는 아파트·빌라·주택·상가·원룸·오피스텔·공장까지 현장을 가리지 않는 누수탐지 전문업체입니다. ${c.view.paras[1]} 국가공인 자격증 보유도 홈페이지에 적힌 내용입니다.`,
+    ],
+    업체: [
+      `${c.view.paras[0]} 건물 종류와 층수, 처음 젖은 날과 범위가 커지는지, 물을 다 잠갔을 때 계량기가 도는지, 보일러 압력이 떨어지는지, 아래층 연락이 왔는지, 누수 보험 가입 여부를 메모해 두세요.`,
+      `${c.view.paras[1]} 통화 전에는 ${nm}의 건물 종류와 처음 젖은 날, 계량기 회전 여부, 보일러 압력 변화, 아래층·옆 세대 연락, 보험 가입 여부를 정리해 두시면 됩니다.`,
+    ],
+  };
+  const s1 = p.service !== '누수탐지' ? [c.view.paras[0], pick(c.view.paras.slice(1), s, 'vp')].join(' ') : pick(viewP[p.mod], s, 'vp');
+  const viewSub: Record<string, string[]> = {
+    '': ['찾는 순서', '위치를 좁히는 방법', '어디서 새는지 찾는 법'],
+    비용: ['비용이 정해지는 기준', '견적을 가르는 네 가지'],
+    가격: ['견적이 달라지는 지점', '가격이 갈리는 이유'],
+    잘하는곳: ['업체를 고르는 기준', '비교할 여섯 가지'],
+    전문업체: ['하는 일과 범위', '맡는 업무'],
+    업체: ['연락 전에 정리할 것', '통화 전에 메모할 것'],
+  };
+
+  // 03 증상
+  const sym = c.symptoms.items;
+  const s2 = [
+    `${nm} ${cn}에서 ${svc.short} 문의는 ‘${sym[0]}’, ‘${sym[1]}’, ‘${sym[2]}’ 같은 말로 시작하는 경우가 많습니다.`,
+    pick([
+      `${sym[3] ? `‘${sym[3]}’는 경우도 같은 신호로 봅니다. ` : ''}부르기 전에 ${nm} 집의 모든 수도꼭지를 잠그고 계량기 바늘이 움직이는지, 보일러 압력계 숫자가 하루 사이 떨어지는지 확인해 두시면 원인을 좁히는 데 씁니다.`,
+      `이럴 때는 젖은 자리와 범위를 날짜별로 찍어 두고, ${nm} 집 수도를 다 잠근 상태에서 계량기가 도는지 봐 주세요. ${sym[3] ? `‘${sym[3]}’는 신호까지 겹친다면 통화 때 함께 알려 주세요. ` : ''}증상을 들으면 들고 갈 장비가 정해집니다.`,
+    ], s, 'sym'),
+    `현장에 도착하면 ${c.info[3][1]}부터 봅니다.`,
+  ].filter(Boolean).join(" ");
+
+  // 04 장비
+  const ti = c.tools.items;
+  const s3 = [
+    `${lb} ${svc.short}에서는 ${j(ti[0].name, '과')} ${ti[1].name}부터 씁니다.`,
+    ...ti.slice(0, 4).map((x, i) => loc(10 + i, `${j(x.name, '은')} ${end(x.d)}`)),
+    pick([`한 장비로 안 잡히면 ${nm} 현장에서 다른 방식으로 다시 확인합니다.`, `${nm} 현장 결과는 화면과 수치로 보여 드리며 설명합니다.`, `${nm} 건물 구조에 따라 순서를 바꿉니다.`], s, 'tt2'),
+  ].filter(Boolean).join(" ");
+
+  // 05 진행 순서
+  const s4 = c.steps.slice(0, 5).map((x, i) => `${SEQ[i]} ${loc(20 + i, end(x.text))}`).join(' ');
+
+  // 06 상담
+  const s5 = [
+    `${end(C.route)}`,
+    pick([
+      `${nm} 주소와 증상, 젖은 자리 사진을 문자로 먼저 보내 주시면 가져갈 장비와 일정을 통화 때 바로 정합니다.`,
+      `${nm} 현장은 건물 종류와 처음 젖은 날, 계량기 상태만 들어도 확인 순서와 일정이 정해집니다.`,
+      `${nm}에서 처음 젖은 것을 본 날과 범위가 커지는지만 알려 주셔도 통화 한 번에 방문 시간을 맞출 수 있습니다.`,
+    ], s, 'cs0'),
+    pick([
+      `사무실은 ${BUSINESS_ADDR}이고, ${nm} 상담은 전화 ${CONTACT.phone}로 받으며 ${CONTACT.hours}합니다.`,
+      `${nm} 현장의 누수 보험 상담과 피해 복구 공사 지원도 함께 하며, 연락은 ${CONTACT.phone}입니다.`,
+    ], s, 'cs'),
+    `${c.region.spots.join('·')} 주변 현장도 같은 순서로 일정을 잡습니다.`,
+    c.region.nearby.length >= 2 ? `${j(nm, '과')} 가까운 ${c.region.nearby.slice(1, 4).join('·')} 쪽 문의도 같은 번호로 받습니다.` : '',
+  ].filter(Boolean).join(" ");
+
+  const sections = [
+    { h: head(0, ['건물과 배관 사정', '동네 현장 특징', '이런 집이 많은 곳']), p: s0 },
+    { h: head(1, p.service === '누수탐지' ? viewSub[p.mod] : ['진행 방식', '이렇게 고칩니다']), p: s1 },
+    { h: head(2, ['의심 증상', '이런 신호가 먼저 보입니다']), p: s2 },
+    { h: head(3, [`${nm} 현장에 가져가는 장비`, '쓰는 장비와 쓰임']), p: s3 },
+    { h: head(4, ['진행 순서', '방문부터 마무리까지']), p: s4 },
+    { h: head(5, [`${nm} 상담과 출동`, '전화 한 통으로 정해지는 것']), p: s5 },
+  ];
+  return { cat: `${c.eyebrow} · ${svc.short}${p.mod ? ` ${p.mod === '잘하는곳' ? '잘하는 곳' : p.mod}` : ''}`, h1sub, summary, sections };
 }

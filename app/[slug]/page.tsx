@@ -2,10 +2,10 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { OPEN_PAGES, PLACES, getPage, pagePath, pageEncodedPath, canonicalPath, cityPath, cityEncodedPath, related } from '../../lib/data';
-import { compose } from '../../lib/compose';
+import { compose, composeRay } from '../../lib/compose';
 import { breadcrumbJsonLd, faqJsonLd, itemListJsonLd, serviceJsonLd } from '../../lib/jsonld';
 import { BRAND, shareMeta } from '../../lib/site';
-import { Actions, IconArrow, JsonLd, SectionHead, Ticker } from '../../components/Common';
+import { Actions, IconArrow, JsonLd } from '../../components/Common';
 
 export const dynamicParams = false;
 
@@ -33,16 +33,20 @@ export default function KeywordPage({ params }: { params: { slug: string } }) {
   const p = getPage(params.slug);
   if (!p) notFound();
   const c = compose(p);
+  const r = composeRay(p, c);
   const P = PLACES[p.place];
   const rel = related(p);
   const path = pageEncodedPath(p);
-  const relList = [...rel.samePlace, ...rel.sameCity, ...rel.otherCities].map((x) => ({ name: x.kw, path: pageEncodedPath(x) }));
-  const [first, ...restWords] = p.kw.split(' ');
-  const h1b = restWords.join(' ');
-  const signPhoto = c.cases.items[1] || c.cases.items[0];
+  // 관련 링크 3묶음 — 본문 내부링크 합계 10~15개 (경로 3 + 아래 최대 12)
+  const groups = [
+    { h: `${P.name} 다른 안내`, items: rel.samePlace.slice(0, 4) },
+    { h: `${p.city} 이웃 동네`, items: rel.sameCity.slice(0, 4) },
+    { h: '다른 시·구', items: rel.otherCities.slice(0, 3) },
+  ].filter((g) => g.items.length);
+  const relList = groups.flatMap((g) => g.items).map((x) => ({ name: x.kw, path: pageEncodedPath(x) }));
 
   return (
-    <main>
+    <main data-topic={`${p.service}|${p.mod}`}>
       <JsonLd
         data={[
           breadcrumbJsonLd([
@@ -63,8 +67,8 @@ export default function KeywordPage({ params }: { params: { slug: string } }) {
             <nav className="crumbs" aria-label="경로">
               <Link href="/">홈</Link><span>/</span><Link href="/area/">지역</Link><span>/</span><Link href={cityPath(p.city)}>{p.city}</Link>
             </nav>
-            <p className="eyebrow">{c.eyebrow}</p>
-            <h1><span><i>{first}</i></span>{h1b && <span><i>{h1b}</i></span>}</h1>
+            <p className="eyebrow">{r.cat}</p>
+            <h1><span>{p.kw}</span>{' '}<span className="hero-sub">{r.h1sub}</span></h1>
             <p className="hero-lead">{c.lead}</p>
             <Actions place />
           </div>
@@ -75,113 +79,39 @@ export default function KeywordPage({ params }: { params: { slug: string } }) {
         </div>
       </section>
 
-      <div className="wrap">
-        <section className="answer" aria-label="요약" data-reveal>
-          <p>{c.answer}</p>
-          <dl>{c.summary.map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
-        </section>
-      </div>
-
-      <Ticker items={c.ticker} />
-
-      <div className="wrap content">
-        <section className="sec">
-          <SectionHead no="01" title={c.region.heading} />
-          <div className="cols">
-            <div className="prose" data-reveal>
-              {c.intro.map((t, i) => <p key={i} className={i === 0 ? 'first' : ''}>{t}</p>)}
-              {c.region.paras.map((t, i) => <p key={`r${i}`}>{t}</p>)}
-            </div>
-            <aside className="memo" data-reveal>
-              <h3>{P.name} 주변</h3>
-              <ol>{c.region.spots.map((h) => <li key={h}>{h}</li>)}</ol>
-              {c.region.nearby.length > 0 && <><h3>같이 다니는 동네</h3><p>{c.region.nearby.join(' · ')}</p></>}
-            </aside>
-          </div>
-        </section>
-
-        <section className="sec mist">
-          <SectionHead no="02" title={c.view.heading} />
-          <div className="prose" data-reveal>{c.view.paras.map((t, i) => <p key={i}>{t}</p>)}</div>
-          {c.view.table && <dl className="spec" data-reveal>{c.view.table.map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl>}
-          {c.view.list && <>
-            <h3 className="h3-sub" data-reveal>{c.view.list.title}</h3>
-            <ol className="memo-list reveal-group">{c.view.list.items.map((x) => <li key={x}>{x}</li>)}</ol>
-          </>}
-        </section>
-
-        <section className="sec">
-          <SectionHead no="03" title={c.symptoms.heading} />
-          <div className="signs">
-            <ul className="reveal-group">{c.symptoms.items.map((x) => <li key={x}>{x}</li>)}</ul>
-            <figure data-reveal>
-              <img src={`/img/${signPhoto.c.img}.webp`} alt={`${p.kw} 확인 장면 - ${signPhoto.c.space}`} loading="lazy" />
-              <figcaption>{signPhoto.c.space} · {BRAND} 시공 사진</figcaption>
-            </figure>
-          </div>
-        </section>
-      </div>
-
-      <section className="band">
-        <div className="wrap">
-          <SectionHead no="04" title={c.tools.heading} sub={c.tools.text} />
-          <ol className="tools reveal-group">
-            {c.tools.items.map((t) => <li key={t.name}><div><h3>{t.name}</h3><p>{t.d}</p></div></li>)}
-          </ol>
-        </div>
-      </section>
-
-      <section className="cta-band" data-reveal>
-        <div className="wrap cta-band-in">
-          <p>{c.cta}</p>
-          <Actions sms={false} />
-        </div>
-      </section>
-
-      <div className="wrap content">
-        <section className="sec">
-          <SectionHead no="05" title={c.cases.heading} sub="기존 홈페이지 현장사진 게시판에 올린 사진입니다. 게시판에 지역이 적혀 있지 않아 장소는 표시하지 않았습니다." />
-          <div className="shots">
-            {c.cases.items.map(({ c: k, caption }, i) => (
-              <figure key={k.img} data-reveal style={{ transitionDelay: `${i * 80}ms` }} tabIndex={0}>
-                <img src={`/img/${k.img}.webp`} alt={`${p.kw} - ${k.scene}`} loading="lazy" />
-                <figcaption><b>{fmt(k.date)} · {k.space}</b>{caption}</figcaption>
-              </figure>
+      <div className="wrap ray-grid">
+        <div className="ray-main">
+          <section className="ray-sum" data-reveal>
+            <h2>{p.kw} 핵심 요약</h2>
+            <p>{r.summary}</p>
+            <dl>{c.summary.map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
+          </section>
+          <article className="ray-article">
+            {r.sections.map((x, i) => (
+              <section key={i}>
+                <h2><span>{String(i + 1).padStart(2, '0')}</span>{x.h}</h2>
+                <p>{x.p}</p>
+              </section>
             ))}
-          </div>
-          <p className="case-note" data-reveal><Link href="/cases/" className="more">시공 사진 전체 보기 <IconArrow /></Link></p>
-        </section>
+          </article>
+          <section className="ray-faq" id="faq">
+            <h2>{p.kw} 자주 묻는 질문</h2>
+            <div className="faq">
+              {c.faq.map((f) => <details key={f.q}><summary>{f.q}<i /></summary><p>{f.a}</p></details>)}
+            </div>
+          </section>
+        </div>
+        <aside className="ray-side">
+          <h3>바로 확인</h3>
+          <dl>{c.info.slice(0, 2).map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
+          <Actions sms={false} />
+        </aside>
+      </div>
 
-        <section className="sec mist">
-          <SectionHead no="06" title={c.stepsHeading} />
-          <ol className="flow reveal-group">
-            {c.steps.map((st) => <li key={st.title}><strong>{st.title}</strong><p>{st.text}</p></li>)}
-          </ol>
-        </section>
-
-        <section className="sec">
-          <SectionHead no="07" title={`${P.name} 상담 안내`} />
-          <dl className="info" data-reveal>{c.info.map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
-        </section>
-
-        <section className="sec mist" id="faq">
-          <SectionHead no="08" title="자주 묻는 질문" />
-          <div className="faq">
-            {c.faq.map((f) => <details key={f.q} data-reveal><summary>{f.q}<i /></summary><p>{f.a}</p></details>)}
-          </div>
-        </section>
-
-        <section className="sec">
-          <SectionHead no="09" title={`${p.kw} 관련 안내`} />
-          <div className="related">
-            {rel.samePlace.length > 0 && <div><h3>{P.name} 다른 안내</h3><ul>{rel.samePlace.map((x) => <li key={x.slug}><Link href={pagePath(x)}>{x.kw}<IconArrow /></Link></li>)}</ul></div>}
-            {rel.sameCity.length > 0 && <div><h3>{p.city} 이웃 동네</h3><ul>{rel.sameCity.map((x) => <li key={x.slug}><Link href={pagePath(x)}>{x.kw}<IconArrow /></Link></li>)}</ul></div>}
-            <div><h3>다른 시·구</h3><ul>
-              {rel.otherCities.map((x) => <li key={x.slug}><Link href={pagePath(x)}>{x.kw}<IconArrow /></Link></li>)}
-              <li><Link href={cityPath(p.city)}>{p.city} 누수탐지 지역 전체<IconArrow /></Link></li>
-            </ul></div>
-          </div>
-        </section>
+      <div className="wrap ray-rel">
+        <div className="related">
+          {groups.map((g) => <div key={g.h}><h3>{g.h}</h3><ul>{g.items.map((x) => <li key={x.slug}><Link href={pagePath(x)}>{x.kw}<IconArrow /></Link></li>)}</ul></div>)}
+        </div>
       </div>
 
       <section className="closing">
