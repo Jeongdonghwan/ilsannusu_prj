@@ -20,7 +20,7 @@ for _s in (sys.stdout, sys.stderr):
 root = sys.argv[1] if len(sys.argv) > 1 else 'out'
 strip = lambda x: re.sub(r'\s+', ' ', html.unescape(re.sub(r'<[^>]+>', ' ', x))).strip()
 nos = lambda x: len(re.sub(r'\s', '', x))
-OK_WORDS = {'마을', '가을', '고을', '효과', '사과', '초과', '치과', '부과', '노은', '보은', '다은'}
+OK_WORDS = {'마을', '가을', '고을', '효과', '사과', '초과', '치과', '부과', '노은', '보은', '다은', '지은', '노을', '나을', '투과'}
 
 
 def has_final(ch):
