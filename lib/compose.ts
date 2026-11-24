@@ -814,5 +814,6 @@ export function composeRay(p: Page, c: Composed = composeBase(p)): Ray {
 // title = "키워드 수식어 | 상호" — 앞부분은 h1 과 같은 글자 (2026-11-24). og·twitter·rss 도 이 값을 쓴다.
 export function compose(p: Page): Composed {
   const c = composeBase(p);
-  return { ...c, title: `${p.kw} ${composeRay(p, c).h1sub} | ${BRAND}` };
+  const head = `${p.kw} ${composeRay(p, c).h1sub}`; // 네이버 권장 40자: 넘으면 상호를 뺀다(og:site_name 에 상호)
+  return { ...c, title: `${head} | ${BRAND}`.length <= 40 ? `${head} | ${BRAND}` : head };
 }

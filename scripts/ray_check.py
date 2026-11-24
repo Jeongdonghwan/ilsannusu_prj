@@ -8,7 +8,7 @@
   - 키워드 전체가 든 h2 수
   - 같은 주제(data-topic) 페이지끼리 같은 문장 비율(무작위 쌍, 공유 문장 수 / 작은 쪽 문장 수) — 평균 30% 이하
   - description 45~80자·중복 0 (§5-3), 키워드 든 h2 4개 이상
-  - title = "키워드 수식어 | 상호": 중복 0, 앞부분 == h1, 전체 60자·앞부분 40자 이하, og:title 같음
+  - title = "키워드 수식어 | 상호": 중복 0, 앞부분 == h1, 전체 40자 이하(넘으면 상호를 뺀다), og:title 같음
   - 조사 오류(받침 없는 말 + 은/을/과, 받침 있는 말 + 를/와), 치환 안 된 자리표시자
 """
 import collections, glob, html, os, random, re, sys
@@ -109,12 +109,12 @@ jb = collections.Counter(e for p in pages for e in josa_errors(p['text']))
 raw = [p['f'] for p in pages if re.search(r'\$\{|undefined|NaN|\bnull\b|\[object', p['text'])]
 print(f'조사 오류 {sum(jb.values())}' + (f'  {jb.most_common(10)}' if jb else '') + f' | 자리표시자 남은 페이지 {len(raw)}')
 TL = [len(p['title']) for p in pages]
-HL = [len(p['title'].rsplit(' | ', 1)[0]) for p in pages]
+HL = [len(p['h1']) for p in pages]
 tdup = len(pages) - len({p['title'] for p in pages})
-tneq = sum(1 for p in pages if p['title'].rsplit(' | ', 1)[0] != p['h1'])
+tneq = sum(1 for p in pages if p['title'] != p['h1'] and not p['title'].startswith(p['h1'] + ' | '))
 togn = sum(1 for p in pages if p['ogt'] != p['title'])
-tbad = sum(1 for a, b in zip(TL, HL) if a > 60 or b > 40)
-print(f'title 길이 {min(TL)}~{max(TL)}자(앞부분 {min(HL)}~{max(HL)}자), 60/40 넘는 것 {tbad}, 중복 {tdup}, 앞부분이 h1 과 다른 것 {tneq}, og:title 다른 것 {togn}')
+tbad = sum(1 for a in TL if a > 40)
+print(f'title 길이 {min(TL)}~{max(TL)}자(앞부분 {min(HL)}~{max(HL)}자), 40자 넘는 것 {tbad}, 중복 {tdup}, 앞부분이 h1 과 다른 것 {tneq}, og:title 다른 것 {togn}')
 ok = not tdup and not tneq and not tbad and not togn and not dup and not nosub and worst_avg <= 0.30 and not jb and not raw and min(kwh2) >= 4 and not dbad and not ddup
 print('판정: ' + ('통과' if ok else '미달'))
 sys.exit(0 if ok else 1)
