@@ -428,7 +428,7 @@ export interface Composed {
   ticker: string[]; cta: string;
 }
 
-export function compose(p: Page): Composed {
+function composeBase(p: Page): Composed {
   const P = PLACES[p.place];
   const C = CITIES[p.city];
   const svc = SVC[p.service];
@@ -656,7 +656,7 @@ const KW_AT = new Set([0, 1, 2, 4]); // 절 6개 중 4개 h2 에 키워드 전�
 const SEQ = ['먼저', '이어서', '그다음', '그 뒤에는', '끝으로'];
 const CTX_H1: Record<Ctx, string> = { apt: '세대 바닥·욕실 배관', villa: '세대 사이 배관', house: '마당·땅속 배관' };
 
-export function composeRay(p: Page, c: Composed = compose(p)): Ray {
+export function composeRay(p: Page, c: Composed = composeBase(p)): Ray {
   const P = PLACES[p.place];
   const C = CITIES[p.city];
   const svc = SVC[p.service];
@@ -673,7 +673,17 @@ export function composeRay(p: Page, c: Composed = compose(p)): Ray {
 
   // h1 수식어 — 키워드에 이미 있는 지역명은 쓰지 않는다
   const near = spot ? `${spot} 주변` : '우리 동네';
-  const h1sub = pick(p.service !== '누수탐지' ? [
+  // title 앞부분 = h1 (§5-1, 2026-11-24): "키워드 수식어"가 40자를 넘으면 더 짧은 벌을 고르고, 그래도 넘으면 구 단위로 자른다
+  const fitSub = (cands: string[]) => {
+    const max = 40 - p.kw.length - 1;
+    const r = rotate(cands, s, 'h1sub');
+    const ok = r.find((x) => x.length <= max);
+    if (ok) return ok;
+    const w = [...r].sort((a, b) => a.length - b.length)[0].split(' ');
+    while (w.length > 1 && w.join(' ').length > max) w.pop();
+    return w.join(' ');
+  };
+  const h1sub = fitSub(p.service !== '누수탐지' ? [
     `${more ? more.look.split(',')[0].trim() : svc.symptoms[0]}부터 보는 순서`,
     `${near} ${cn} 현장 진행 순서`,
     `${t(0)}·${j(t(1), '으로')} 확인하고 고치기`,
@@ -697,7 +707,7 @@ export function composeRay(p: Page, c: Composed = compose(p)): Ray {
     spot ? `${spot} 주변 현장, 위치부터 찾기` : '우리 집 누수 위치부터 찾기',
     '계량기 확인부터 부분 수리까지',
     `${CTX_H1[cx]}부터 짚는 탐지 순서`,
-  ], s, 'h1sub');
+  ]);
 
   // 핵심 요약 — 결론 3~4문장
   const firstLook = more ? more.look.split(',')[0].trim() : { apt: '세대 밸브와 바닥 배관', villa: '세대 사이 배관과 공용 배관', house: '계량기와 땅속 급수관' }[cx];
@@ -799,4 +809,10 @@ export function composeRay(p: Page, c: Composed = compose(p)): Ray {
     { h: head(5, [`${nm} 상담과 출동`, '전화 한 통으로 정해지는 것']), p: s5 },
   ];
   return { cat: `${c.eyebrow} · ${svc.short}${p.mod ? ` ${p.mod === '잘하는곳' ? '잘하는 곳' : p.mod}` : ''}`, h1sub, summary, sections };
+}
+
+// title = "키워드 수식어 | 상호" — 앞부분은 h1 과 같은 글자 (2026-11-24). og·twitter·rss 도 이 값을 쓴다.
+export function compose(p: Page): Composed {
+  const c = composeBase(p);
+  return { ...c, title: `${p.kw} ${composeRay(p, c).h1sub} | ${BRAND}` };
 }
