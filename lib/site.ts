@@ -39,7 +39,7 @@ export const PLACE = {
 //   OPEN_WAVE=1 npm run build  (post-launch 7일 오픈: 1 = 10/28 시·구 83 / 2 = 10/30 255 / 3 = 11/1 383 / 4 = 11/3 전체 510 — scripts/drip/rebatch.py
 //   오픈 뒤 추가 793: 5 = 11/12 (397) / 6 = 11/14 (396) — data/drip.json extra)
 export const OPEN_WAVE = Number(process.env.OPEN_WAVE || 3);
-export const UPDATED = '2026-11-16'; // content revision date - bump when page text changes
+export const UPDATED = '2026-11-24'; // content revision date - bump when page text changes
 
 // 표기만 다른 키워드 페이지(일산/고양 일산/고양시 일산, 주엽/주엽동 …)는 대표 페이지로 canonical + 사이트맵 제외
 export const MERGE_VARIANTS = true;
